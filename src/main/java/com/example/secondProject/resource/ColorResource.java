@@ -7,11 +7,13 @@ import com.example.secondProject.resource.dto.ErrorResponseModel;
 import com.example.secondProject.resource.validator.UniqueConstraintValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.context.request.WebRequest;
 
 import java.util.List;
 import java.util.Optional;
@@ -48,6 +50,15 @@ public class ColorResource {
     protected void initBinder(WebDataBinder binder) {
         binder.addValidators(uniqueConstraintValidator);
     }
+
+    // chestii folosite in parametrii unui HandlerMethod (functie a unui endpoint)
+    // @PathVariable -
+    // @RequestParam -
+    // @RequestHeader maybe? -
+    // @RequestBody -
+    // @RequestPart -
+    // @ModelAttribute - Trebe folosit - cu exmplu la filtrari
+    // BindingResult -
 
     @PutMapping("/color/{colorId}")
     public ResponseEntity<?> createOrUpdate(@PathVariable Long colorId, @Validated @RequestBody ColorModel color, BindingResult colorValidationResult) {
