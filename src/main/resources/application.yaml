@@ -1,0 +1,14 @@
+server:
+  servlet:
+    context-path: /second-app
+  port: '8082'
+
+spring:
+  mustache:
+    suffix: .html
+  datasource:
+    url: jdbc:postgresql://localhost:5433/student
+    username: student
+    password: student
+  jpa:
+    show-sql: true
