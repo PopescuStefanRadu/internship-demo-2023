@@ -2,24 +2,33 @@ package com.example.secondProject.resource;
 
 import com.example.secondProject.entity.Color;
 import com.example.secondProject.repository.ColorRepository;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
 import java.util.Optional;
 
 @RequestMapping("/api")
-@RestController()
+@RestController
 @RequiredArgsConstructor
+@Slf4j
 public class ColorResource {
 
     private final ColorRepository colorRepository;
 
-    @GetMapping("/color/{colorId}")
+//    @ExceptionHandler(EntityNotFoundException.class)
+//    @ResponseBody
+//    public ResponseEntity<Object> handleNotFoundException(EntityNotFoundException e) {
+//        return ResponseEntity.status(404).body(Map.of("hello", "world"));
+//    } // TODO
+
+    @GetMapping(value = "/color/{colorId}", produces = "application/json")
     public ResponseEntity<Color> getColor(@PathVariable Long colorId) {
-        return ResponseEntity.ok(colorRepository.findById(colorId)
-                .orElseThrow(() -> new RuntimeException("could not find color with id: %s".formatted(colorId)))
-        );
+        return colorRepository.findById(colorId).map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
     // PUT /color/verde
