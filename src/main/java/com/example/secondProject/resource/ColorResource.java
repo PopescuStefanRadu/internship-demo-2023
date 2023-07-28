@@ -49,7 +49,7 @@ public class ColorResource {
     @InitBinder
     protected void initBinder(WebDataBinder binder) {
         binder.addValidators(uniqueConstraintValidator);
-    }
+    } // TODO how to make global
 
     // chestii folosite in parametrii unui HandlerMethod (functie a unui endpoint)
     // @PathVariable -
@@ -63,16 +63,7 @@ public class ColorResource {
     @PutMapping("/color/{colorId}")
     public ResponseEntity<?> createOrUpdate(@PathVariable Long colorId, @Validated @RequestBody ColorModel color, BindingResult colorValidationResult) {
         if (colorValidationResult.hasErrors())  {
-            log.info("Validation result: {}", colorValidationResult);
-            ErrorResponseModel build = ErrorResponseModel.builder()
-                    .errors(colorValidationResult.getAllErrors().stream()
-                            .map(objectError -> ErrorResponseModel.ErrorModel.builder()
-                                    .code(objectError.getCode())
-                                    .message(objectError.getDefaultMessage())
-                                    .build()
-                            )
-                            .toList())
-                    .build();
+            ErrorResponseModel build = ErrorResponseModel.fromBindingErrors(colorValidationResult);
             return ResponseEntity.badRequest().body(build);
         }
 //        ResponseEntity.status(200).headers(httpHeaders -> {
@@ -91,7 +82,7 @@ public class ColorResource {
 //        ResponseEntity.status(200).headers(httpHeaders -> {
 //            httpHeaders.add("X-Application-Name", "workshop");
 //        }).body(null);
-        Optional<Color> byId = colorRepository.findById(colorId);// TODO handle exceptions globally
+        Optional<Color> byId = colorRepository.findById(colorId); // TODO handle exceptions globally
         if (byId.isPresent()) {
             colorRepository.deleteById(colorId);
             return ResponseEntity.ok().body(byId.get());

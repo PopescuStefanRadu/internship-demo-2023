@@ -1,6 +1,7 @@
 package com.example.secondProject.resource.dto;
 
 
+import com.example.secondProject.resource.validator.CNP;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
@@ -15,6 +16,7 @@ import lombok.*;
 public class ColorModel {
     @Min(1)
     @NotNull
+
     private Long id;
 
     @Pattern(regexp = "^#[0-9a-fA-F]{6}$")
