@@ -2,13 +2,18 @@ package com.example.secondProject.resource;
 
 import com.example.secondProject.entity.Color;
 import com.example.secondProject.repository.ColorRepository;
-import jakarta.persistence.EntityNotFoundException;
+import com.example.secondProject.resource.dto.ColorModel;
+import com.example.secondProject.resource.dto.ErrorResponseModel;
+import com.example.secondProject.resource.validator.UniqueConstraintValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Map;
+import java.util.List;
 import java.util.Optional;
 
 @RequestMapping("/api")
@@ -17,6 +22,7 @@ import java.util.Optional;
 @Slf4j
 public class ColorResource {
 
+    private final UniqueConstraintValidator uniqueConstraintValidator;
     private final ColorRepository colorRepository;
 
 //    @ExceptionHandler(EntityNotFoundException.class)
@@ -38,13 +44,35 @@ public class ColorResource {
     // GET /color/verde
     // GET /colors?shade=bright
 
+    @InitBinder
+    protected void initBinder(WebDataBinder binder) {
+        binder.addValidators(uniqueConstraintValidator);
+    }
 
     @PutMapping("/color/{colorId}")
-    public ResponseEntity<Color> createOrUpdate(@PathVariable Long colorId, @RequestBody Color color) {
+    public ResponseEntity<?> createOrUpdate(@PathVariable Long colorId, @Validated @RequestBody ColorModel color, BindingResult colorValidationResult) {
+        if (colorValidationResult.hasErrors())  {
+            log.info("Validation result: {}", colorValidationResult);
+            ErrorResponseModel build = ErrorResponseModel.builder()
+                    .errors(colorValidationResult.getAllErrors().stream()
+                            .map(objectError -> ErrorResponseModel.ErrorModel.builder()
+                                    .code(objectError.getCode())
+                                    .message(objectError.getDefaultMessage())
+                                    .build()
+                            )
+                            .toList())
+                    .build();
+            return ResponseEntity.badRequest().body(build);
+        }
 //        ResponseEntity.status(200).headers(httpHeaders -> {
 //            httpHeaders.add("X-Application-Name", "workshop");
 //        }).body(null);
-        return ResponseEntity.ok(colorRepository.save(color));
+        return ResponseEntity.ok(colorRepository.save(
+                Color.builder()
+                        .id(colorId)
+                        .code(color.getCode())
+                        .shade(color.getShade())
+                        .build()));
     }
 
     @DeleteMapping("/color/{colorId}")
