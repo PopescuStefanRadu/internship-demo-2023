@@ -1,5 +1,6 @@
 package com.example.secondProject.resource;
 
+import com.example.secondProject.resource.dto.ErrorModel;
 import com.example.secondProject.resource.dto.ErrorResponseModel;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.http.HttpStatus;
@@ -9,7 +10,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.util.List;
-import java.util.Map;
 
 @RestControllerAdvice
 public class GlobalAdvices {
@@ -17,7 +17,7 @@ public class GlobalAdvices {
     @ExceptionHandler(EntityNotFoundException.class)
     @ResponseBody
     public ResponseEntity<Object> handleNotFoundException(EntityNotFoundException e) {
-        ErrorResponseModel.ErrorModel error = ErrorResponseModel.ErrorModel.builder()
+        ErrorModel error = ErrorModel.builder()
                 .code("notFound")
                 .message(e.getMessage())
                 .build();
