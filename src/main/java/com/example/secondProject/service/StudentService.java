@@ -12,6 +12,9 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.persistence.criteria.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -52,6 +55,13 @@ public class StudentService {
         }
 
         List<Student> all = studentRepository.findAll(Specification.allOf(specs));
+
+        {
+            // how to do sorting
+            var pageFromUi = 0;
+            Page<Student> name = studentRepository.findAll(Specification.allOf(specs), PageRequest.of(pageFromUi, 10)
+                    .withSort(Sort.by("name").ascending().and(Sort.by("university"))));
+        }
         return all.stream().map(StudentModelMapper::fromEntity).toList();
     }
     public StudentModel updateStudent(final Long id, final StudentModifyModel studentModifyModel) {

@@ -6,6 +6,7 @@ import jakarta.annotation.PreDestroy;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
@@ -25,6 +26,13 @@ public class InjectionExample {
     private final Map<String, Mailer> mailersByBeanName;
     private final ApplicationContext context;
 
+    @Value("#{mailerConfigurationProperties.gmailMailConfig.enableSMTP}")
+    private final Boolean enableSMTP;
+
+
+    @Value("${USERNAME:test}") // ce e intre () e SpEL
+    private final String envVarUsername;
+
     @PostConstruct
     public void postConstruct() {
         // Constructor bean1
@@ -37,7 +45,7 @@ public class InjectionExample {
         // PostConstruct bean1
         // PostConstruct bean2
 
-        log.info("StudentService#postConstruct");
+        log.info("StudentService#postConstruct, enableSMTP: {}, username: {}", enableSMTP, envVarUsername);
 
 
         allMailers.forEach(mailer -> mailer.mail(null));
