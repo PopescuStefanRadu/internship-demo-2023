@@ -25,6 +25,8 @@ public class Student {
     @Column(name = "id")
     private Long id;
 
+    private String cnp;
+
     @Column(name = "name")
     private String name;
 

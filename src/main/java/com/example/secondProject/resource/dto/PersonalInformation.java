@@ -3,7 +3,6 @@ package com.example.secondProject.resource.dto;
 import com.example.secondProject.resource.validator.CNP;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Null;
-import jakarta.validation.groups.Default;
 import lombok.*;
 
 @AllArgsConstructor
@@ -13,9 +12,9 @@ import lombok.*;
 @EqualsAndHashCode
 @ToString
 public class PersonalInformation {
-    @CNP(message = "Hi CNP is wrong!", groups = {StudentModel.AtCreation.class})
-    @NotNull(groups = {StudentModel.AtCreation.class})
-    @Null(groups = {StudentModel.AtEdit.class})
+    @CNP(message = "Hi CNP is wrong!", groups = {StudentModifyModel.AtCreation.class})
+    @NotNull(groups = {StudentModifyModel.AtCreation.class})
+    @Null(groups = {StudentModifyModel.AtEdit.class})
     private String cnp;
 
     private String name;

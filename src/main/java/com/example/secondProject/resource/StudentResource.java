@@ -1,23 +1,20 @@
 package com.example.secondProject.resource;
 
 import com.example.secondProject.entity.Student;
-import com.example.secondProject.repository.StudentRepository;
 import com.example.secondProject.resource.dto.ErrorResponseModel;
 import com.example.secondProject.resource.dto.StudentFilterModel;
 import com.example.secondProject.resource.dto.StudentModel;
-import jakarta.persistence.EntityNotFoundException;
+import com.example.secondProject.resource.dto.StudentModifyModel;
+import com.example.secondProject.service.StudentService;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,10 +25,10 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class StudentResource {
 
-    private final StudentRepository studentRepository;
+    private final StudentService studentService;
 
     @PostMapping(value = "/student/create")
-    public ResponseEntity<?> createStudent(@Validated(StudentModel.AtCreation.class) @RequestBody StudentModel studentModel, BindingResult bindingResult) {
+    public ResponseEntity<?> createStudent(@Validated(StudentModifyModel.AtCreation.class) @RequestBody StudentModifyModel studentModifyModel, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             return ResponseEntity.badRequest().body(ErrorResponseModel.fromBindingErrors(bindingResult));
         }
@@ -40,35 +37,16 @@ public class StudentResource {
 
 
     @PostMapping(value = "/student/{id}/update")
-    public ResponseEntity<?> updateStudent(@PathVariable Long id,  @Validated(StudentModel.AtEdit.class) @RequestBody StudentModel studentModel, BindingResult bindingResult) {
+    public ResponseEntity<?> updateStudent(@PathVariable Long id, @Validated(StudentModifyModel.AtEdit.class) @RequestBody StudentModifyModel studentModifyModel, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             return ResponseEntity.badRequest().body(ErrorResponseModel.fromBindingErrors(bindingResult));
         }
-        Student student = studentRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Could not update a student that does not exist. Id: %s".formatted(id)));
 
-        student.setName(studentModel.getPersonalInformation().getName())
-                .setUniversity(studentModel.getUniversity());
-
-        return ResponseEntity.ok(studentRepository.save(student));
+        return ResponseEntity.ok(studentService.updateStudent(id, studentModifyModel));
     }
 
     @GetMapping("/students")
-    public ResponseEntity<List<Student>> getFiltered(@ModelAttribute StudentFilterModel sfm) {
-        List<Specification<Student>> specs = new ArrayList<>();
-
-        if (sfm.gradeGt != null) {
-            specs.add((Root<Student> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) ->
-                    criteriaBuilder.gt(root.get(Student.Fields.GRADE), sfm.getGradeGt()));
-        }
-
-        if (sfm.getUniversityIn() != null && !sfm.getUniversityIn().isEmpty()) {
-            specs.add((Root<Student> students, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) ->
-                    students.get(Student.Fields.UNIVERSITY).in(sfm.getUniversityIn()));
-        }
-
-
-        List<Student> all = studentRepository.findAll(Specification.allOf(specs));
-        return ResponseEntity.ok(all);
+    public ResponseEntity<List<StudentModel>> getFiltered(@ModelAttribute StudentFilterModel sfm) {
+        return ResponseEntity.ok(studentService.getFiltered(sfm));
     }
 }
