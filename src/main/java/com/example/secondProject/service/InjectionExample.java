@@ -1,5 +1,6 @@
 package com.example.secondProject.service;
 
+import com.example.secondProject.config.MailerConfigurationProperties;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import lombok.RequiredArgsConstructor;

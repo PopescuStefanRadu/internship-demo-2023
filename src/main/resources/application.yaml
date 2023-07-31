@@ -16,3 +16,10 @@ spring:
       ddl-auto: update
   profiles:
     active: "${ACTIVE_PROFILES}"
+
+university:
+  mailers:
+    gmail-mail-config:
+      service-url: "test"
+      port: 489
+      enableSMTP: true
