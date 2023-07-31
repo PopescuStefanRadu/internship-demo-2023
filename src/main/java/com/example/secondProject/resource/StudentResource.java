@@ -1,10 +1,12 @@
 package com.example.secondProject.resource;
 
 import com.example.secondProject.entity.Student;
+import com.example.secondProject.repository.StudentRepository;
 import com.example.secondProject.resource.dto.ErrorResponseModel;
 import com.example.secondProject.resource.dto.StudentFilterModel;
 import com.example.secondProject.resource.dto.StudentModel;
 import com.example.secondProject.resource.dto.StudentModifyModel;
+import com.example.secondProject.resource.dto.mapper.StudentModelMapper;
 import com.example.secondProject.service.StudentService;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
@@ -26,6 +28,7 @@ import java.util.Map;
 public class StudentResource {
 
     private final StudentService studentService;
+    private final StudentRepository studentRepository;
 
     @PostMapping(value = "/student/create")
     public ResponseEntity<?> createStudent(@Validated(StudentModifyModel.AtCreation.class) @RequestBody StudentModifyModel studentModifyModel, BindingResult bindingResult) {
@@ -48,5 +51,11 @@ public class StudentResource {
     @GetMapping("/students")
     public ResponseEntity<List<StudentModel>> getFiltered(@ModelAttribute StudentFilterModel sfm) {
         return ResponseEntity.ok(studentService.getFiltered(sfm));
+    }
+
+    @GetMapping("/students-by-course-code")
+    public ResponseEntity<List<StudentModel>> getFiltered(@RequestParam String code) {
+        List<StudentModel> list = studentRepository.findByCourseCode(code).stream().map(StudentModelMapper::fromEntity).toList();
+        return ResponseEntity.ok(list);
     }
 }

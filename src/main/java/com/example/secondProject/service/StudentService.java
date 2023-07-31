@@ -1,20 +1,21 @@
 package com.example.secondProject.service;
 
 import com.example.secondProject.dto.StudentCarColorDTO;
+import com.example.secondProject.entity.Course;
 import com.example.secondProject.entity.Student;
+import com.example.secondProject.entity.StudentAttendedCourse;
 import com.example.secondProject.repository.StudentRepository;
 import com.example.secondProject.resource.dto.StudentFilterModel;
 import com.example.secondProject.resource.dto.StudentModel;
 import com.example.secondProject.resource.dto.StudentModifyModel;
 import com.example.secondProject.resource.dto.mapper.StudentModelMapper;
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.Root;
+import jakarta.persistence.criteria.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,11 +40,18 @@ public class StudentService {
                     students.get(Student.Fields.UNIVERSITY).in(sfm.getUniversityIn()));
         }
 
+        if (StringUtils.hasText(sfm.getAttendedCourse())) {
+            specs.add((student, query, criteriaBuilder) -> {
+                Join<Student, StudentAttendedCourse> courses = student.join("courses");
+                Path<Object> courseCode = courses.get("course").get("code");
+
+                return criteriaBuilder.equal(courseCode, sfm.getAttendedCourse());
+            });
+        }
 
         List<Student> all = studentRepository.findAll(Specification.allOf(specs));
-        return all.stream().map(StudentModelMapper::fromStudent).toList();
+        return all.stream().map(StudentModelMapper::fromEntity).toList();
     }
-
     public StudentModel updateStudent(final Long id, final StudentModifyModel studentModifyModel) {
         Student student = studentRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Could not update a student that does not exist. Id: %s".formatted(id)));
@@ -52,7 +60,7 @@ public class StudentService {
                 .setUniversity(studentModifyModel.getUniversity());
 
         Student save = studentRepository.save(student);
-        return StudentModelMapper.fromStudent(student);
+        return StudentModelMapper.fromEntity(student);
     }
 
     public List<String> getStudentsNamesByUniversity(String university) {

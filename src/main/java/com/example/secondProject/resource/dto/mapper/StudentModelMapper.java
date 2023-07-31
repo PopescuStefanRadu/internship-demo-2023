@@ -7,10 +7,11 @@ public final class StudentModelMapper {
 
     private StudentModelMapper() {}
 
-    public static StudentModel fromStudent(final Student stud) {
+    public static StudentModel fromEntity(final Student stud) {
         return new StudentModel()
                 .setCnp(stud.getCnp())
                 .setName(stud.getName())
-                .setUniversity(stud.getUniversity());
+                .setUniversity(stud.getUniversity())
+                .setGrades(stud.getCourses().stream().map(GradeMapper::fromEntity).toList());
     }
 }

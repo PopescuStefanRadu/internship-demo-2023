@@ -37,4 +37,5 @@ public class StudentFilterModel {
     public BigDecimal gradeLtEq;
     public BigDecimal gradeGradeEq;
 
+    public String attendedCourse;
 }
