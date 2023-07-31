@@ -1,7 +1,6 @@
 package com.example.secondProject.service;
 
 import com.example.secondProject.dto.StudentCarColorDTO;
-import com.example.secondProject.entity.Course;
 import com.example.secondProject.entity.Student;
 import com.example.secondProject.entity.StudentAttendedCourse;
 import com.example.secondProject.repository.StudentRepository;
@@ -9,14 +8,10 @@ import com.example.secondProject.resource.dto.StudentFilterModel;
 import com.example.secondProject.resource.dto.StudentModel;
 import com.example.secondProject.resource.dto.StudentModifyModel;
 import com.example.secondProject.resource.dto.mapper.StudentModelMapper;
-import jakarta.annotation.PostConstruct;
-import jakarta.annotation.PreDestroy;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.persistence.criteria.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.context.ApplicationContext;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,7 +19,6 @@ import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -33,33 +27,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class StudentService {
     private final StudentRepository studentRepository;
-    private final List<Mailer> allMailers;
-    @Qualifier("mailerServiceMailchimp")
-    private final Mailer mailchimp;
-    @Qualifier("mailerServiceGmail")
-    private final Mailer gmail;
-    private final Mailer defaultMailer;
-    private final Map<String, Mailer> mailersByBeanName;
-    private final ApplicationContext context;
-    @PostConstruct
-    public void postConstruct() {
-        // Constructor bean1
-        // PostConstruct bean1
-        // Constructor bean2
-        // PostConstruct bean2
-
-        // Constructor bean1
-        // Constructor bean2
-        // PostConstruct bean1
-        // PostConstruct bean2
-
-        log.info("StudentService#postConstruct");
-    }
-
-    @PreDestroy
-    public void preDestroy() {
-        log.info("");
-    }
+    private final Mailer mailer;
 
     public List<StudentModel> getFiltered(final StudentFilterModel sfm) {
         List<Specification<Student>> specs = new ArrayList<>();
