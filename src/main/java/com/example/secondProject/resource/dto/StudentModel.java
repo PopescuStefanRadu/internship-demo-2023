@@ -17,6 +17,7 @@ public class StudentModel {
 
 
     @Valid
+    @NotNull
     private PersonalInformation personalInformation;
 
     private String university;

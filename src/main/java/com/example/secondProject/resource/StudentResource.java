@@ -5,6 +5,7 @@ import com.example.secondProject.repository.StudentRepository;
 import com.example.secondProject.resource.dto.ErrorResponseModel;
 import com.example.secondProject.resource.dto.StudentFilterModel;
 import com.example.secondProject.resource.dto.StudentModel;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Predicate;
@@ -41,7 +42,13 @@ public class StudentResource {
         if (bindingResult.hasErrors()) {
             return ResponseEntity.badRequest().body(ErrorResponseModel.fromBindingErrors(bindingResult));
         }
-        return ResponseEntity.ok(Map.of());
+        Student student = studentRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Could not update a student that does not exist. Id: %s".formatted(id)));
+
+        student.setName(studentModel.getPersonalInformation().getName())
+                .setUniversity(studentModel.getUniversity());
+
+        return ResponseEntity.ok(studentRepository.save(student));
     }
 
     @GetMapping("/students")
@@ -61,9 +68,5 @@ public class StudentResource {
 
         List<Student> all = studentRepository.findAll(Specification.allOf(specs));
         return ResponseEntity.ok(all);
-    }
-
-    public static Specification<Student> isLongTermCustomer() {
-        return (Root<Student> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) -> null;
     }
 }

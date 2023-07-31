@@ -5,6 +5,7 @@ import com.example.secondProject.repository.ColorRepository;
 import com.example.secondProject.resource.dto.ColorModel;
 import com.example.secondProject.resource.dto.ErrorResponseModel;
 import com.example.secondProject.resource.validator.UniqueConstraintValidator;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpMethod;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.WebRequest;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RequestMapping("/api")
@@ -27,16 +29,17 @@ public class ColorResource {
     private final UniqueConstraintValidator uniqueConstraintValidator;
     private final ColorRepository colorRepository;
 
-//    @ExceptionHandler(EntityNotFoundException.class)
-//    @ResponseBody
-//    public ResponseEntity<Object> handleNotFoundException(EntityNotFoundException e) {
-//        return ResponseEntity.status(404).body(Map.of("hello", "world"));
-//    } // TODO
+    @ExceptionHandler(EntityNotFoundException.class)
+    @ResponseBody
+    public ResponseEntity<Object> handleNotFoundException(EntityNotFoundException e) {
+        return ResponseEntity.status(404).body(Map.of("hello", "world"));
+    }
 
     @GetMapping(value = "/color/{colorId}", produces = "application/json")
     public ResponseEntity<Color> getColor(@PathVariable Long colorId) {
-        return colorRepository.findById(colorId).map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        return colorRepository.findById(colorId)
+                .map(ResponseEntity::ok)
+                .orElseThrow(() -> new EntityNotFoundException("Could not find color with id: %s".formatted(colorId)));
     }
 
     // PUT /color/verde
@@ -79,15 +82,10 @@ public class ColorResource {
 
     @DeleteMapping("/color/{colorId}")
     public ResponseEntity<Color> delete(@PathVariable Long colorId) {
-//        ResponseEntity.status(200).headers(httpHeaders -> {
-//            httpHeaders.add("X-Application-Name", "workshop");
-//        }).body(null);
-        Optional<Color> byId = colorRepository.findById(colorId); // TODO handle exceptions globally
-        if (byId.isPresent()) {
-            colorRepository.deleteById(colorId);
-            return ResponseEntity.ok().body(byId.get());
-        }
-        return ResponseEntity.notFound().build();
+        Color color = colorRepository.findById(colorId)
+                .orElseThrow(() -> new EntityNotFoundException("Could not find color with id: %s".formatted(colorId)));
+        colorRepository.delete(color);
+        return ResponseEntity.ok(color);
     }
 
 }
